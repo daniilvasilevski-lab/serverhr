@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from pydantic import BaseModel, Field
 
+from .config.settings import settings, get_settings, LoggingSettings, SecuritySettings
 from .services.integrated_analyzer import IntegratedInterviewAnalyzer
 from .services.temporal_analyzer import TemporalInterviewAnalyzer
 from .services.cv_analyzer import CVAnalyzer
@@ -23,10 +24,7 @@ from .models.evaluation_criteria import InterviewAnalysis, EvaluationCriteria, C
 import openai
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.config.dictConfig(LoggingSettings.get_config())
 logger = logging.getLogger(__name__)
 
 # Глобальные переменные для сервисов
@@ -43,11 +41,8 @@ async def lifespan(app: FastAPI):
     # Инициализация сервисов
     logger.info("Initializing services...")
     
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is required")
-    
-    openai_client = openai.OpenAI(api_key=openai_api_key)
+    # Используем настройки из config
+    openai_client = openai.OpenAI(api_key=settings.openai_api_key)
     analyzer = IntegratedInterviewAnalyzer(openai_client)
     temporal_analyzer = TemporalInterviewAnalyzer(openai_client)
     cv_analyzer = CVAnalyzer(openai_client)
@@ -70,13 +65,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Настройка CORS
+# Настройка CORS с использованием настроек
+cors_config = SecuritySettings.get_cors_config()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене ограничить конкретными доменами
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    **cors_config
 )
 
 # Модели запросов и ответов
@@ -148,7 +141,8 @@ async def health_check():
     services_status = {
         "analyzer": "ok" if analyzer else "not_initialized",
         "sheets_service": "ok" if sheets_service else "not_initialized",
-        "openai_api": "ok" if os.getenv("OPENAI_API_KEY") else "missing_key"
+        "openai_api": "ok" if settings.openai_api_key else "missing_key",
+        "settings": "ok" if settings else "not_loaded"
     }
     
     all_ok = all(status == "ok" for status in services_status.values())
@@ -524,7 +518,7 @@ async def general_exception_handler(request, exc):
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 8000)),
-        reload=True if os.getenv("ENV") == "development" else False
+        host=settings.host,
+        port=settings.port,
+        reload=settings.is_development
     )
