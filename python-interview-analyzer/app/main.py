@@ -20,6 +20,8 @@ from .services.cv_analyzer import CVAnalyzer
 from .services.questions_analyzer import QuestionsAnalyzer
 from .services.google_sheets_service import GoogleSheetsService
 from .services.results_sheets_service import ResultsSheetsService
+from .services.task_scheduler import TaskScheduler, create_task_scheduler
+from .api.task_management import router as task_router
 from .models.evaluation_criteria import InterviewAnalysis, EvaluationCriteria, CRITERIA_DESCRIPTIONS
 import openai
 
@@ -71,6 +73,9 @@ app.add_middleware(
     CORSMiddleware,
     **cors_config
 )
+
+# Подключение маршрутов
+app.include_router(task_router)
 
 # Модели запросов и ответов
 class AnalysisRequest(BaseModel):
