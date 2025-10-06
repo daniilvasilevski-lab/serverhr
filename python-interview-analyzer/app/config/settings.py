@@ -4,7 +4,8 @@
 
 import os
 from typing import List, Optional
-from pydantic import BaseSettings, validator
+from pydantic import validator
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 # Загружаем переменные из .env файла
@@ -28,6 +29,8 @@ class Settings(BaseSettings):
     
     google_service_account_key: Optional[str] = None
     results_sheet_id: Optional[str] = None
+    source_sheet_url: Optional[str] = None
+    results_sheet_url: Optional[str] = None
     
     # === НАСТРОЙКИ АНАЛИЗА ===
     
@@ -64,6 +67,11 @@ class Settings(BaseSettings):
     # === КЕШИРОВАНИЕ ===
     
     cache_ttl: int = 3600
+    
+    # === ПЛАНИРОВЩИК ЗАДАЧ ===
+    
+    scan_interval_minutes: int = 5
+    enable_auto_processing: bool = False
     
     class Config:
         env_file = ".env"
