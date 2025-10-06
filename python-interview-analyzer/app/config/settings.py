@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     
     # === ОБЯЗАТЕЛЬНЫЕ НАСТРОЙКИ ===
     
-    openai_api_key: str
+    openai_api_key: Optional[str] = None
     
     # === НАСТРОЙКИ ПРИЛОЖЕНИЯ ===
     
@@ -73,39 +73,16 @@ class Settings(BaseSettings):
     scan_interval_minutes: int = 5
     enable_auto_processing: bool = False
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-        
-        # Маппинг переменных окружения
-        fields = {
-            "openai_api_key": {"env": "OPENAI_API_KEY"},
-            "env": {"env": "ENV"},
-            "port": {"env": "PORT"},
-            "host": {"env": "HOST"},
-            "google_service_account_key": {"env": "GOOGLE_SERVICE_ACCOUNT_KEY"},
-            "results_sheet_id": {"env": "RESULTS_SHEET_ID"},
-            "default_language": {"env": "DEFAULT_LANGUAGE"},
-            "max_video_size_mb": {"env": "MAX_VIDEO_SIZE_MB"},
-            "video_download_timeout": {"env": "VIDEO_DOWNLOAD_TIMEOUT"},
-            "log_level": {"env": "LOG_LEVEL"},
-            "log_file": {"env": "LOG_FILE"},
-            "secret_key": {"env": "SECRET_KEY"},
-            "allowed_origins": {"env": "ALLOWED_ORIGINS"},
-            "workers": {"env": "WORKERS"},
-            "max_concurrent_analyses": {"env": "MAX_CONCURRENT_ANALYSES"},
-            "whisper_model": {"env": "WHISPER_MODEL"},
-            "detailed_analysis_logging": {"env": "DETAILED_ANALYSIS_LOGGING"},
-            "temp_dir": {"env": "TEMP_DIR"},
-            "sentry_dsn": {"env": "SENTRY_DSN"},
-            "enable_metrics": {"env": "ENABLE_METRICS"},
-            "cache_ttl": {"env": "CACHE_TTL"}
-        }
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": False,
+        "extra": "ignore"
+    }
     
     @validator("openai_api_key")
     def validate_openai_key(cls, v):
-        if not v or not v.startswith("sk-"):
-            raise ValueError("OpenAI API key is required and must start with 'sk-'")
+        if v and not v.startswith("sk-"):
+            raise ValueError("OpenAI API key must start with 'sk-' if provided")
         return v
     
     @validator("allowed_origins")
