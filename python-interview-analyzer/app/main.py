@@ -39,25 +39,67 @@ results_service = None
 async def lifespan(app: FastAPI):
     """Управление жизненным циклом приложения"""
     global analyzer, temporal_analyzer, sheets_service, results_service
-    
+
+    # Логотип и приветствие
+    logger.info("=" * 80)
+    logger.info("🚀 ЗАПУСК INTERVIEW ANALYZER v2.0")
+    logger.info("=" * 80)
+
+    # Информация о конфигурации
+    logger.info(f"📋 Конфигурация:")
+    logger.info(f"   • Среда: {settings.env.upper()}")
+    logger.info(f"   • Порт: {settings.port}")
+    logger.info(f"   • Язык по умолчанию: {settings.default_language}")
+    logger.info(f"   • Whisper модель: {settings.whisper_model}")
+    logger.info(f"   • Автообработка: {'ВКЛ' if settings.enable_auto_processing else 'ВЫКЛ'}")
+    if settings.enable_auto_processing:
+        logger.info(f"   • Интервал сканирования: {settings.scan_interval_minutes} мин")
+
     # Инициализация сервисов
-    logger.info("Initializing services...")
-    
-    # Используем настройки из config
+    logger.info(f"\n🔧 Инициализация сервисов...")
+
+    # OpenAI
+    logger.info(f"   [1/6] OpenAI клиент...")
     openai_client = openai.OpenAI(api_key=settings.openai_api_key)
+    logger.info(f"         ✅ OpenAI клиент готов")
+
+    # Анализаторы
+    logger.info(f"   [2/6] Интегрированный анализатор...")
     analyzer = IntegratedInterviewAnalyzer(openai_client)
+    logger.info(f"         ✅ Анализатор готов")
+
+    logger.info(f"   [3/6] Временной анализатор...")
     temporal_analyzer = TemporalInterviewAnalyzer(openai_client)
+    logger.info(f"         ✅ Временной анализатор готов")
+
+    logger.info(f"   [4/6] CV и Questions анализаторы...")
     cv_analyzer = CVAnalyzer(openai_client)
     questions_analyzer = QuestionsAnalyzer(openai_client)
+    logger.info(f"         ✅ CV и Questions анализаторы готовы")
+
+    # Google Sheets
+    logger.info(f"   [5/6] Google Sheets сервис...")
     sheets_service = GoogleSheetsService()
+    logger.info(f"         ✅ Google Sheets подключен")
+
+    logger.info(f"   [6/6] Results Sheets сервис...")
     results_service = ResultsSheetsService()
-    
-    logger.info("Services initialized successfully")
-    
+    logger.info(f"         ✅ Results Sheets подключен")
+
+    logger.info(f"\n✅ ВСЕ СЕРВИСЫ ИНИЦИАЛИЗИРОВАНЫ УСПЕШНО!")
+    logger.info("=" * 80)
+    logger.info(f"🌐 Сервер доступен: http://{settings.host}:{settings.port}")
+    logger.info(f"📚 API документация: http://{settings.host}:{settings.port}/docs")
+    logger.info(f"❤️ Health check: http://{settings.host}:{settings.port}/health")
+    logger.info("=" * 80)
+    logger.info(f"⏳ Ожидание запросов...\n")
+
     yield
-    
+
     # Очистка ресурсов
-    logger.info("Shutting down services...")
+    logger.info("\n" + "=" * 80)
+    logger.info("🛑 ОСТАНОВКА СЕРВЕРА")
+    logger.info("=" * 80)
 
 # Создание приложения FastAPI
 app = FastAPI(

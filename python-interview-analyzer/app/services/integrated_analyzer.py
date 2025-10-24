@@ -142,26 +142,38 @@ class IntegratedInterviewAnalyzer:
         Returns:
             InterviewAnalysis: Комплексный анализ
         """
-        logger.info(f"Starting integrated analysis for {candidate_info.get('name', 'Unknown')}")
-        
+        candidate_name = candidate_info.get('name', 'Unknown')
+        logger.info(f"🔬 НАЧАЛО ИНТЕГРИРОВАННОГО АНАЛИЗА для {candidate_name}")
+
         # 1. Подготовка объединенных данных для ИИ
+        logger.info(f"📋 Этап 1/4: Подготовка контекста интервью...")
         integrated_context = self._prepare_integrated_context(
             transcript_data, video_data, audio_data, candidate_info
         )
-        
+        logger.info(f"   ✓ Длительность: {integrated_context['interview_content']['duration_seconds']}с")
+        logger.info(f"   ✓ Количество слов: {integrated_context['interview_content']['word_count']}")
+        logger.info(f"   ✓ Доминирующая эмоция: {integrated_context['nonverbal_behavior']['dominant_emotion']}")
+        logger.info(f"   ✓ Зрительный контакт: {integrated_context['nonverbal_behavior']['eye_contact_percentage']:.1f}%")
+
         # 2. Единый комплексный анализ через GPT-4
+        logger.info(f"🤖 Этап 2/4: Холистический анализ через GPT-4...")
         comprehensive_analysis = await self._analyze_with_full_context(integrated_context)
-        
+        logger.info(f"   ✓ Комплексный анализ завершен")
+
         # 3. Создание детализированных оценок с конкретными примерами
+        logger.info(f"📊 Этап 3/4: Детальная оценка по 10 критериям...")
         detailed_scores = await self._create_detailed_scores(
             comprehensive_analysis, integrated_context
         )
-        
+        logger.info(f"   ✓ Все 10 критериев оценены")
+
         # 4. Формирование итогового результата
+        logger.info(f"📝 Этап 4/4: Формирование итогового результата...")
         final_analysis = self._build_final_analysis(
             detailed_scores, integrated_context, comprehensive_analysis, candidate_info
         )
-        
+        logger.info(f"✅ АНАЛИЗ ЗАВЕРШЕН для {candidate_name}")
+
         return final_analysis
     
     def _prepare_integrated_context(
@@ -353,26 +365,44 @@ class IntegratedInterviewAnalyzer:
     
     async def _create_detailed_scores(self, analysis: Dict, context: Dict) -> Dict:
         """Создание детализированных оценок с форматированием"""
-        
+
         detailed_scores = {}
         scores = analysis.get("holistic_scores", {})
         observations = analysis.get("detailed_observations", {})
-        
-        for criterion in EvaluationCriteria:
+
+        # Названия критериев на русском для логирования
+        criteria_names = {
+            EvaluationCriteria.COMMUNICATION_SKILLS: "Коммуникативные навыки",
+            EvaluationCriteria.MOTIVATION_LEARNING: "Мотивация к обучению",
+            EvaluationCriteria.PROFESSIONAL_SKILLS: "Профессиональные навыки",
+            EvaluationCriteria.ANALYTICAL_THINKING: "Аналитическое мышление",
+            EvaluationCriteria.UNCONVENTIONAL_THINKING: "Нестандартное мышление",
+            EvaluationCriteria.TEAMWORK_ABILITY: "Командная работа",
+            EvaluationCriteria.STRESS_RESISTANCE: "Стрессоустойчивость",
+            EvaluationCriteria.ADAPTABILITY: "Адаптивность",
+            EvaluationCriteria.CREATIVITY_INNOVATION: "Креативность и инновации",
+            EvaluationCriteria.OVERALL_IMPRESSION: "Общее впечатление"
+        }
+
+        total_criteria = len(EvaluationCriteria)
+        for idx, criterion in enumerate(EvaluationCriteria, 1):
+            criterion_name = criteria_names.get(criterion, criterion.value)
+            logger.info(f"   📌 Критерий {idx}/{total_criteria}: {criterion_name}...")
+
             criterion_key = criterion.value
             score = scores.get(criterion_key, 5)
             examples = observations.get(criterion_key, [])
-            
+
             # Создание объяснения на основе холистического анализа
             explanation = self._generate_integrated_explanation(
                 criterion, score, analysis, context
             )
-            
+
             # Форматированная оценка
             formatted_eval = self._format_evaluation_with_examples(
                 score, explanation, examples
             )
-            
+
             evaluation_score = EvaluationScore(
                 criterion=criterion,
                 score=score,
@@ -383,9 +413,10 @@ class IntegratedInterviewAnalyzer:
                 specific_examples=examples,
                 formatted_evaluation=formatted_eval
             )
-            
+
             detailed_scores[criterion] = evaluation_score
-        
+            logger.info(f"      ✓ Оценка: {score}/10")
+
         return detailed_scores
     
     def _classify_tempo(self, wpm: float) -> str:

@@ -338,7 +338,13 @@ class GoogleSheetsIntegration:
             # Обрабатываем каждое интервью
             for idx, interview_data in enumerate(unprocessed_interviews, 1):
                 try:
-                    logger.info(f"🔄 Processing {idx}/{stats['found']}: {interview_data['name']}")
+                    logger.info("=" * 80)
+                    logger.info(f"🎯 НАЧАЛО ОБРАБОТКИ КАНДИДАТА #{idx}/{stats['found']}")
+                    logger.info(f"👤 Имя: {interview_data['name']}")
+                    logger.info(f"🆔 ID: {interview_data['id']}")
+                    logger.info(f"📧 Email: {interview_data['email']}")
+                    logger.info(f"🎥 Видео: {interview_data['video_url'][:60]}...")
+                    logger.info("=" * 80)
 
                     # Подготавливаем информацию о кандидате
                     candidate_info = {
@@ -349,6 +355,8 @@ class GoogleSheetsIntegration:
                         'preferences': interview_data['preferences']
                     }
 
+                    logger.info(f"⏳ Запуск анализа интервью для {interview_data['name']}...")
+
                     # Анализируем интервью
                     analysis_result = await analyzer.analyze_interview(
                         interview_data['video_url'],
@@ -358,19 +366,25 @@ class GoogleSheetsIntegration:
                     if analysis_result:
                         stats['processed'] += 1
 
+                        logger.info(f"✅ Анализ завершен успешно!")
+                        logger.info(f"📊 Итоговая оценка: {analysis_result.total_score}/100")
+                        logger.info(f"💡 Рекомендация: {analysis_result.recommendation}")
+
                         # Сохраняем результаты
+                        logger.info(f"💾 Сохранение результатов в Google Sheets...")
                         if await self.save_analysis_results(analysis_result, candidate_info):
                             stats['saved'] += 1
 
                             # Отмечаем как обработанное
+                            logger.info(f"✏️ Отметка интервью как обработанного...")
                             await self.mark_as_processed(interview_data)
 
-                            logger.info(f"✅ Successfully processed: {interview_data['name']} ({idx}/{stats['found']})")
+                            logger.info(f"🎉 УСПЕШНО ОБРАБОТАН: {interview_data['name']} ({idx}/{stats['found']})")
                         else:
-                            logger.error(f"❌ Failed to save results for: {interview_data['name']}")
+                            logger.error(f"❌ Ошибка при сохранении результатов для: {interview_data['name']}")
                     else:
                         stats['failed'] += 1
-                        logger.error(f"❌ Analysis failed for: {interview_data['name']}")
+                        logger.error(f"❌ ОШИБКА АНАЛИЗА для: {interview_data['name']}")
 
                 except Exception as e:
                     stats['failed'] += 1
