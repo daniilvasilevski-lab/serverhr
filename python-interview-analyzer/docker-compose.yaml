@@ -22,6 +22,7 @@ services:
       - ./logs:/app/logs
       - ./temp:/app/temp
       - ./data:/app/data
+      - ./credentials:/app/credentials  # Монтирование Google credentials
     depends_on:
       - redis
     restart: unless-stopped
