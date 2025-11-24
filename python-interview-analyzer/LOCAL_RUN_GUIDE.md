@@ -112,3 +112,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - **Нет доступа к таблицам** — проверьте, что сервисный аккаунт добавлен в Google Sheets с правами Editor.
 - **FFmpeg not found** — установите FFmpeg (`sudo apt install ffmpeg`).
 - **OPENAI_API_KEY пустой** — без ключа запросы к модели не будут работать.
+- **Permission denied к `/var/run/docker.sock`** — либо не запущен Docker, либо нет прав на сокет. Исправление:
+  - запустите демон: `sudo systemctl start docker` (или `sudo service docker start` на старых системах);
+  - добавьте пользователя в группу docker и **перезайдите в терминал/сессию**: `sudo usermod -aG docker "$USER"`;
+  - для единичного запуска можно выполнить команду с sudo: `sudo docker compose up --build`.
