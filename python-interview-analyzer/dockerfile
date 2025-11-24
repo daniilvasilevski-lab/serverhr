@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     libopenblas-dev \
     liblapack-dev \
-    libblas-dev \
+
     libboost-all-dev \
     gfortran \
     pkg-config \

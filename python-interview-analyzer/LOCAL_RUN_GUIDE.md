@@ -126,15 +126,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   - запустите демон: `sudo systemctl start docker` (или `sudo service docker start` на старых системах);
   - добавьте пользователя в группу docker и **перезайдите в терминал/сессию**: `sudo usermod -aG docker "$USER"`;
   - для единичного запуска можно выполнить команду с sudo: `sudo docker compose up --build`.
-- **Конфликты после `git pull`** — сделайте копию `.env` и `credentials/`, затем либо сбросьте репозиторий к последней версии (`git fetch origin && git reset --hard origin/main && git clean -fd`), либо вручную разрешите конфликт в файлах, удалив маркеры `<<<<<<<`/`=======`/`>>>>>>>` и зафиксировав правку `git add . && git commit -m "Resolve merge conflicts"`.
-- **Сборка dlib падает при `pip install -r requirements.txt`** (вручную, без Docker) — установите системные библиотеки и повторите (на свежих Debian/Ubuntu используйте `libblas-dev` вместо устаревшего `libatlas-base-dev`):
-  ```bash
-  sudo apt update
-  sudo apt install -y \
-    cmake \
-    libopenblas-dev \
-    liblapack-dev \
-    libblas-dev \
+
     libboost-all-dev \
     gfortran \
     pkg-config \
