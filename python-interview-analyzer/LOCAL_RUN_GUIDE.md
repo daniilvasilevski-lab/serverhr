@@ -104,9 +104,19 @@ docker compose up --build
 ## 7. Альтернативный запуск без Docker
 Только если Docker недоступен:
 ```bash
+# 1) Установите модуль для виртуальных окружений (иначе получите ошибку
+#    "externally-managed-environment" при pip install)
+sudo apt update && sudo apt install -y python3-venv
+
+# 2) Создайте и активируйте окружение рядом с проектом
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3) Установите зависимости и запустите сервер
 pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+> Если всё же видите предупреждение про *externally-managed-environment*, значит вы не в активированном `.venv`. Выполните `source .venv/bin/activate` и повторите `pip install -r requirements.txt`.
 
 ## 8. Частые проблемы
 - **Нет доступа к таблицам** — проверьте, что сервисный аккаунт добавлен в Google Sheets с правами Editor.
@@ -122,3 +132,4 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   sudo apt install -y cmake libopenblas-dev liblapack-dev
   pip install -r requirements.txt
   ```
+- **externally-managed-environment при `pip install`** — вы ставите пакеты в системный Python. Решение: `sudo apt install -y python3-venv`, затем `python3 -m venv .venv && source .venv/bin/activate` и повторите `pip install -r requirements.txt`.
