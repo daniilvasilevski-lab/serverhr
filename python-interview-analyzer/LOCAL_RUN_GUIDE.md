@@ -129,7 +129,17 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - **Сборка dlib падает при `pip install -r requirements.txt`** (вручную, без Docker) — установите системные библиотеки и повторите:
   ```bash
   sudo apt update
-  sudo apt install -y cmake libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev
+  sudo apt install -y \
+    cmake \
+    libopenblas-dev \
+    liblapack-dev \
+    libatlas-base-dev \
+    libboost-all-dev \
+    gfortran \
+    pkg-config \
+    libx11-dev \
+    libgtk-3-dev \
+    libgl1-mesa-dev
   pip install -r requirements.txt
   ```
 - **externally-managed-environment при `pip install`** — вы ставите пакеты в системный Python. Решение: `sudo apt install -y python3-venv`, затем `python3 -m venv .venv && source .venv/bin/activate` и повторите `pip install -r requirements.txt`.
