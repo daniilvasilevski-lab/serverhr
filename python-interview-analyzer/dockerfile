@@ -32,6 +32,10 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libglib2.0-0 \
+    # Для сборки dlib
+    cmake \
+    libopenblas-dev \
+    liblapack-dev \
     # Для компиляции Python пакетов
     gcc \
     g++ \
