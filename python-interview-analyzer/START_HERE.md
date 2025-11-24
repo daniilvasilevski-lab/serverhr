@@ -15,6 +15,31 @@
 ✅ Легкое редактирование промптов без изменения кода
 ✅ Production-ready Docker setup
 
+> Уже скачали репозиторий и хотите быстро запустить? Смотрите краткое пошаговое руководство: [LOCAL_RUN_GUIDE.md](LOCAL_RUN_GUIDE.md).
+
+### 🔄 Как обновить уже скачанный репозиторий до последней версии
+
+Если у вас есть локальные правки, сохраните их (commit или `git stash`) перед обновлением.
+
+```bash
+cd python-interview-analyzer
+# Посмотреть, нет ли несохранённых файлов
+git status
+
+# Скачать свежие изменения из основной ветки
+git pull origin main
+
+# Пересобрать контейнеры с учётом обновлений
+docker-compose down
+docker-compose up --build -d
+
+# Проверить, что всё поднялось
+docker-compose ps
+curl http://localhost:8000/health
+```
+
+Если используете dev-профиль: замените команды на `docker-compose --profile dev ...`.
+
 ---
 
 ## 🎯 Шаг 1: Подготовка Google Sheets
