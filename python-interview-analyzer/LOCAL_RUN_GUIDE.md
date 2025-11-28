@@ -101,27 +101,35 @@ docker compose up --build
    curl -X POST "http://localhost:8000/api/v1/sheets/process-all"
    ```
 
-## 7. Альтернативный запуск без Docker
-Только если Docker недоступен. Быстрый путь — готовый скрипт: 
+## 7. Автозапуск без Docker в одном терминале (всё включено)
+Если нужно, чтобы установка зависимостей и запуск сервера шли в **одном терминале и без Docker**, используйте новый скрипт:
 ```bash
 # 1) Установите модуль для виртуальных окружений (иначе будет ошибка
 #    "externally-managed-environment" при pip install)
 sudo apt update && sudo apt install -y python3-venv
 
-# 2) Запустите автонастройку (создаст venv, проверит доступность PyPI/прокси,
-#    установит зависимости)
-./scripts/setup_local.sh
+# 2) Запустите установку + автозапуск (создаст venv, проверит PyPI, поставит пакеты,
+#    запустит сервер и покажет все логи в этом же терминале)
+bash scripts/install_and_run_local.sh
+```
+Что делает скрипт:
+- создаёт/активирует `.venv` и ставит зависимости через `scripts/setup_local.sh`;
+- проверяет окружение (`check_system.py`);
+- запускает FastAPI/uvicorn в **этом** терминале, оставляя все логи и статус здесь (Ctrl+C — остановка).
 
-# 3) Активируйте окружение и запустите сервер
+Если хотите раздельно: сначала поставить зависимости, потом запускать вручную — используйте прежний короткий путь:
+```bash
+bash scripts/setup_local.sh
 source .venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
 Если скрипт пишет, что не может достучаться до PyPI:
 - Проверьте, нужны ли вам прокси-переменные `http_proxy`/`https_proxy` (или наоборот — удалите их `unset http_proxy https_proxy`).
 - Если у вас корпоративное зеркало PyPI, задайте его: `export PIP_INDEX_URL=https://<ваш-миррор>/simple` и повторите запуск скрипта.
 - Скрипт прекращает работу при недоступности индекса, чтобы вы сразу увидели сетевую проблему, а не падение `pip install` в конце.
 
-> Если видите предупреждение про *externally-managed-environment*, значит вы не в активированном `.venv`. Выполните `source .venv/bin/activate` и повторите `pip install -r requirements.txt` или `./scripts/setup_local.sh`.
+> Если видите предупреждение про *externally-managed-environment*, значит вы не в активированном `.venv`. Выполните `source .venv/bin/activate` и повторите `pip install -r requirements.txt` или `bash scripts/install_and_run_local.sh`.
 
 ## 8. Частые проблемы
 - **Нет доступа к таблицам** — проверьте, что сервисный аккаунт добавлен в Google Sheets с правами Editor.

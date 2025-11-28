@@ -168,11 +168,12 @@ docker-compose logs -f app
 
 ### Если Docker недоступен
 1. Установите модуль виртуальных окружений: `sudo apt update && sudo apt install -y python3-venv`
-2. Запустите автоскрипт локальной установки (создаст venv, проверит доступ к PyPI/прокси, поставит зависимости):
+2. Одной командой поставить зависимости и сразу запустить сервер в этом терминале:
    ```bash
-   ./scripts/setup_local.sh
+   bash scripts/install_and_run_local.sh
    ```
-3. Активируйте окружение и запустите сервер: `source .venv/bin/activate && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+   Скрипт сам создаст/активирует `.venv`, проверит PyPI/прокси, установит зависимости и поднимет uvicorn с логами в текущем окне.
+3. Если хотите ставить и запускать раздельно: `bash scripts/setup_local.sh && source .venv/bin/activate && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
    Если скрипт пишет, что не достучался до PyPI, настройте/уберите прокси (`http_proxy`/`https_proxy`) или задайте зеркало `PIP_INDEX_URL=https://<mirror>/simple` и повторите.
 
 ### 3.3 Проверьте health
