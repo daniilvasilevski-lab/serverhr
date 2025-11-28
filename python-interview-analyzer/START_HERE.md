@@ -15,6 +15,56 @@
 ✅ Легкое редактирование промптов без изменения кода
 ✅ Production-ready Docker setup
 
+> Уже скачали репозиторий и хотите быстро запустить? Смотрите краткое пошаговое руководство: [LOCAL_RUN_GUIDE.md](LOCAL_RUN_GUIDE.md).
+
+### 🔄 Как обновить уже скачанный репозиторий до последней версии
+
+Если у вас есть локальные правки, сохраните их (commit или `git stash`) перед обновлением.
+
+```bash
+cd python-interview-analyzer
+# Посмотреть, нет ли несохранённых файлов
+git status
+
+# Скачать свежие изменения из основной ветки
+git pull origin main
+
+# Пересобрать контейнеры с учётом обновлений
+docker-compose down
+docker-compose up --build -d
+
+# Проверить, что всё поднялось
+docker-compose ps
+curl http://localhost:8000/health
+```
+
+Если сборка падала на установке системных пакетов, очистите кэш образов и соберите без кеша: `docker-compose build --no-cache` (или `docker compose ...`, оба варианта работают).
+
+Если используете dev-профиль: замените команды на `docker-compose --profile dev ...`.
+
+#### Если при `git pull` появились конфликты (как на скриншоте GitHub)
+
+1. Сохраните важные локальные файлы (обычно `.env` и ключи из `credentials/`).
+2. Если хотите просто взять последнее состояние из основной ветки и у вас нет нужных правок:
+   ```bash
+   git fetch origin
+   git reset --hard origin/main
+   git clean -fd  # удалит лишние неотслеживаемые файлы
+   ```
+   Затем пересоберите контейнеры:
+   ```bash
+   docker compose down
+   docker compose up --build
+   ```
+3. Если есть нужные локальные изменения, откройте помеченные файлы (обычно `LOCAL_RUN_GUIDE.md`, `START_HERE.md`, `dockerfile`) и вручную выберите нужные версии в редакторе, удалив маркеры `<<<<<<<`, `=======`, `>>>>>>>`, после чего завершите merge:
+   ```bash
+   git add .
+   git commit -m "Resolve merge conflicts"
+   ```
+   И снова пересоберите контейнеры как в шаге выше.
+
+> При сбросе через `git reset --hard` все несохранённые изменения удаляются, поэтому заранее сделайте копию `.env` и ключей.
+
 ---
 
 ## 🎯 Шаг 1: Подготовка Google Sheets
@@ -115,6 +165,15 @@ docker-compose logs -f app
 ✅ Connected to results sheet: ...
 ✅ Prompts loaded from: prompts.yaml
 ```
+
+### Если Docker недоступен
+1. Установите модуль виртуальных окружений: `sudo apt update && sudo apt install -y python3-venv`
+2. Запустите автоскрипт локальной установки (создаст venv, проверит доступ к PyPI/прокси, поставит зависимости):
+   ```bash
+   ./scripts/setup_local.sh
+   ```
+3. Активируйте окружение и запустите сервер: `source .venv/bin/activate && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+   Если скрипт пишет, что не достучался до PyPI, настройте/уберите прокси (`http_proxy`/`https_proxy`) или задайте зеркало `PIP_INDEX_URL=https://<mirror>/simple` и повторите.
 
 ### 3.3 Проверьте health
 
