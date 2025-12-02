@@ -8,6 +8,8 @@ import sys
 import os
 import importlib
 import subprocess
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 def print_status(message, status="INFO"):
@@ -110,8 +112,16 @@ def check_env_file():
             content = f.read()
             
         required_vars = ["OPENAI_API_KEY"]
+
+        def is_var_set(var_name: str, text: str) -> bool:
+            for line in text.splitlines():
+                if line.strip().startswith(f"{var_name}="):
+                    value = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    return bool(value) and "your-" not in value.lower() and "changeme" not in value.lower()
+            return False
+
         for var in required_vars:
-            if var in content and not content.count(f"{var}=your-") > 0:
+            if is_var_set(var, content):
                 print_status(f"Переменная {var}: настроена", "OK")
             else:
                 print_status(f"Переменная {var}: НЕ настроена", "WARNING")
@@ -119,6 +129,30 @@ def check_env_file():
         return True
     else:
         print_status("Файл .env: НЕ найден (скопируйте из .env.example)", "WARNING")
+        return False
+
+def check_package_index():
+    """Быстрая проверка доступности PyPI или указанного зеркала."""
+    index = os.environ.get("PIP_INDEX_URL", "https://pypi.org/simple").rstrip("/")
+    probe_url = f"{index}/fastapi/"
+
+    try:
+        with urllib.request.urlopen(probe_url, timeout=10) as resp:
+            ok = 200 <= resp.status < 400
+            if ok:
+                print_status(f"Пакетный индекс доступен: {probe_url} (status {resp.status})", "OK")
+                return True
+            print_status(f"Пакетный индекс отвечает ошибкой: {probe_url} (status {resp.status})", "WARNING")
+            return False
+    except urllib.error.URLError as exc:
+        print_status(
+            f"Нет доступа к пакету fastapi по адресу {probe_url}: {exc}",
+            "ERROR",
+        )
+        print("Попробуйте:")
+        print("- Если используете корпоративный прокси: экспортируйте https_proxy/http_proxy")
+        print("- Если прокси блокирует CONNECT: временно unset http_proxy/https_proxy")
+        print("- Или задайте зеркало PyPI через PIP_INDEX_URL")
         return False
 
 def check_app_imports():
@@ -145,7 +179,8 @@ def main():
     
     checks = [
         ("Версия Python", check_python_version),
-        ("Системные зависимости", check_system_dependencies), 
+        ("Системные зависимости", check_system_dependencies),
+        ("Доступ к пакетному индексу", check_package_index),
         ("Структура файлов", check_files_structure),
         ("Файл окружения", check_env_file)
     ]
@@ -205,8 +240,8 @@ def main():
         print("python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000")
     else:
         print_status("❌ Есть проблемы, требующие исправления", "ERROR")
-        print("\nОбратитесь к INSTALLATION.md для решения проблем")
-    
+        print("\nОбратитесь к INSTALLATION_GUIDE_FOR_BEGINNERS.md для решения проблем")
+
     return all_passed
 
 if __name__ == "__main__":
