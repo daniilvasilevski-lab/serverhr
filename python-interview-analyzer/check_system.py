@@ -29,12 +29,16 @@ def print_status(message, status="INFO"):
 def check_python_version():
     """Проверка версии Python"""
     version = sys.version_info
-    if version.major >= 3 and version.minor >= 10:
+    if (version.major, version.minor) >= (3, 11):
         print_status(f"Python версия: {version.major}.{version.minor}.{version.micro}", "OK")
         return True
-    else:
-        print_status(f"Python версия: {version.major}.{version.minor}.{version.micro} (требуется 3.10+)", "ERROR")
-        return False
+
+    print_status(
+        f"Python версия: {version.major}.{version.minor}.{version.micro} (требуется 3.11+)",
+        "ERROR",
+    )
+    print("Установите python3.11 и виртуальное окружение python3.11-venv, затем запустите скрипты с PYTHON=python3.11")
+    return False
 
 def check_package(package_name, import_name=None):
     """Проверка установки пакета"""
@@ -112,8 +116,16 @@ def check_env_file():
             content = f.read()
             
         required_vars = ["OPENAI_API_KEY"]
+
+        def is_var_set(var_name: str, text: str) -> bool:
+            for line in text.splitlines():
+                if line.strip().startswith(f"{var_name}="):
+                    value = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    return bool(value) and "your-" not in value.lower() and "changeme" not in value.lower()
+            return False
+
         for var in required_vars:
-            if var in content and not content.count(f"{var}=your-") > 0:
+            if is_var_set(var, content):
                 print_status(f"Переменная {var}: настроена", "OK")
             else:
                 print_status(f"Переменная {var}: НЕ настроена", "WARNING")
