@@ -13,6 +13,7 @@ if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
   exit 1
 fi
 
+HEAD
 # 0) Enforce minimum Python version (pip >=24 on старых версиях Python вызывает AttributeError freedesktop_os_release)
 if ! "${PYTHON_BIN}" - <<'PY'
 import sys
@@ -40,6 +41,12 @@ if [ ! -d "${VENV_PATH}" ]; then
     cat /tmp/venv.err
     exit 1
   fi
+=======
+# 1) Create venv if missing
+if [ ! -d "${VENV_PATH}" ]; then
+  echo "[INFO] Creating virtual environment at ${VENV_PATH}"
+  "${PYTHON_BIN}" -m venv "${VENV_PATH}"
+origin/main
 fi
 
 # 2) Activate venv
@@ -74,12 +81,16 @@ except urllib.error.URLError as exc:
 PY
 
 # 5) Install dependencies
+HEAD
 if ! python -m pip install --default-timeout=120 -r requirements.txt; then
   echo "[ERROR] pip install failed."
   echo "        If you are behind a proxy, set https_proxy/http_proxy or PIP_INDEX_URL."
   echo "        To retry from scratch: rm -rf ${VENV_PATH} && rerun this script."
   exit 1
 fi
+=======
+python -m pip install --default-timeout=120 -r requirements.txt
+origin/main
 
 echo "[DONE] Dependencies installed. Activate the venv (source ${VENV_PATH}/bin/activate) and run:"
 echo "       uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"

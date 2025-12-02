@@ -39,7 +39,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     libopenblas-dev \
     liblapack-dev \
+HEAD:python-interview-analyzer/Dockerfile
     libblas-dev \
+=======
+ codex/analyze-project-readiness-and-setup-ilokil
+    libblas-dev \
+=======
+    libatlas-base-dev \
+ main
+origin/main:python-interview-analyzer/dockerfile
     libboost-all-dev \
     gfortran \
     pkg-config \
