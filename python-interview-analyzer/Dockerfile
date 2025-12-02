@@ -20,21 +20,15 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # === ЭТАП ЗАВИСИМОСТЕЙ ===
 FROM base as dependencies
 
-# Установка системных зависимостей (минимальный набор для сборки dlib/face-recognition)
- codex/analyze-project-readiness-and-setup-ta0sm3
+# Установка системных зависимостей (минимальный набор для сборки dlib/face-recognition
+# и работы с аудио/видео)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    curl \
-    wget \
-    git \
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
     # Системные утилиты
     curl \
     wget \
     git \
     # Аудио/видео обработка
-main
     ffmpeg \
     libsm6 \
     libxext6 \
@@ -43,59 +37,28 @@ main
     libx11-dev \
     libgtk-3-dev \
     libgl1-mesa-dev \
-codex/analyze-project-readiness-and-setup-ta0sm3
+    # Линейная алгебра и численные библиотеки
     cmake \
     libopenblas-dev \
     liblapack-dev \
     libblas-dev \
-    libboost-all-dev \
-    gfortran \
-    pkg-config \
-
-    # Для сборки dlib
-    cmake \
-    libopenblas-dev \
-    liblapack-dev \
-codex/analyze-project-readiness-and-setup-g70f2j
-    libblas-dev \
-
-HEAD:python-interview-analyzer/Dockerfile
-    libblas-dev \
-
- codex/analyze-project-readiness-and-setup-ilokil
-    libblas-dev \
-
     libatlas-base-dev \
- main
-origin/main:python-interview-analyzer/dockerfile
- main
     libboost-all-dev \
     gfortran \
     pkg-config \
-    # Для компиляции Python пакетов
-main
+    # Для компиляции Python-пакетов
     gcc \
     g++ \
     build-essential \
     python3-dev \
-codex/analyze-project-readiness-and-setup-ta0sm3
-    libjpeg-dev \
-    libpng-dev \
-    libasound2-dev \
-    portaudio19-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
     # Для работы с изображениями
     libjpeg-dev \
     libpng-dev \
     # Для работы с аудио
     libasound2-dev \
     portaudio19-dev \
-    # Очистка кеша
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
- main
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Обновление pip
 RUN pip install --upgrade pip setuptools wheel
