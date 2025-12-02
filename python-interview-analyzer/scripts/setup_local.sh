@@ -13,6 +13,21 @@ if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
   exit 1
 fi
 
+# 0) Enforce minimum Python version (pip >=24 on старых версиях Python вызывает AttributeError freedesktop_os_release)
+if ! "${PYTHON_BIN}" - <<'PY'
+import sys
+req = (3, 11)
+cur = sys.version_info
+if cur < req:
+    print(f"[ERROR] Python {req[0]}.{req[1]}+ required. Found {cur.major}.{cur.minor}.{cur.micro}.")
+    print("        Install python3.11 (apt install python3.11 python3.11-venv) and rerun with PYTHON=python3.11")
+    raise SystemExit(1)
+print(f"[OK] Using Python {cur.major}.{cur.minor}.{cur.micro}")
+PY
+then
+  exit 1
+fi
+
 # 1) Create venv if missing
 if [ ! -d "${VENV_PATH}" ]; then
   echo "[INFO] Creating virtual environment at ${VENV_PATH}"

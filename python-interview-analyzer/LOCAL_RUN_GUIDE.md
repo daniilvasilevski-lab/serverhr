@@ -141,6 +141,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   - для единичного запуска можно выполнить команду с sudo: `sudo docker compose up --build`.
 - **Конфликты после `git pull`** — сделайте копию `.env` и `credentials/`, затем либо сбросьте репозиторий к последней версии (`git fetch origin && git reset --hard origin/main && git clean -fd`), либо вручную разрешите конфликт в файлах, удалив маркеры `<<<<<<<`/`=======`/`>>>>>>>` и зафиксировав правку `git add . && git commit -m "Resolve merge conflicts"`.
 - **`pip install` не может скачать пакеты (PyPI недоступен)** — запустите `./scripts/setup_local.sh`, он проверит доступ к индексу и подскажет: добавить прокси-переменные или, наоборот, убрать их. При наличии корпоративного зеркала задайте `PIP_INDEX_URL=https://<mirror>/simple`.
+- **AttributeError: platform.freedesktop_os_release / pip падает на старом Python** — вы запускаете скрипты через Python < 3.11, который не поддерживает новую версию pip. Решение: `sudo apt install -y python3.11 python3.11-venv`, затем запустите скрипт так: `PYTHON=python3.11 bash scripts/install_and_run_local.sh` (или `scripts/setup_local.sh`) и удалите старое окружение `.venv`, если оно было создано другой версией Python.
 - **Сборка dlib падает при `pip install -r requirements.txt`** (вручную, без Docker) — установите системные библиотеки и повторите (на свежих Debian/Ubuntu используйте `libblas-dev` вместо устаревшего `libatlas-base-dev`):
   ```bash
   sudo apt update

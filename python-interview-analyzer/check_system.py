@@ -29,12 +29,16 @@ def print_status(message, status="INFO"):
 def check_python_version():
     """Проверка версии Python"""
     version = sys.version_info
-    if version.major >= 3 and version.minor >= 10:
+    if (version.major, version.minor) >= (3, 11):
         print_status(f"Python версия: {version.major}.{version.minor}.{version.micro}", "OK")
         return True
-    else:
-        print_status(f"Python версия: {version.major}.{version.minor}.{version.micro} (требуется 3.10+)", "ERROR")
-        return False
+
+    print_status(
+        f"Python версия: {version.major}.{version.minor}.{version.micro} (требуется 3.11+)",
+        "ERROR",
+    )
+    print("Установите python3.11 и виртуальное окружение python3.11-venv, затем запустите скрипты с PYTHON=python3.11")
+    return False
 
 def check_package(package_name, import_name=None):
     """Проверка установки пакета"""
