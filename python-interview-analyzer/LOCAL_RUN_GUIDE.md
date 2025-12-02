@@ -101,6 +101,7 @@ docker compose up --build
    curl -X POST "http://localhost:8000/api/v1/sheets/process-all"
    ```
 
+codex/analyze-project-readiness-and-setup-ilokil
 ## 7. Автозапуск без Docker в одном терминале (всё включено)
 Если нужно, чтобы установка зависимостей и запуск сервера шли в **одном терминале и без Docker**, используйте новый скрипт:
 ```bash
@@ -130,6 +131,24 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - Скрипт прекращает работу при недоступности индекса, чтобы вы сразу увидели сетевую проблему, а не падение `pip install` в конце.
 
 > Если видите предупреждение про *externally-managed-environment*, значит вы не в активированном `.venv`. Выполните `source .venv/bin/activate` и повторите `pip install -r requirements.txt` или `bash scripts/install_and_run_local.sh`.
+=======
+## 7. Альтернативный запуск без Docker
+Только если Docker недоступен:
+```bash
+# 1) Установите модуль для виртуальных окружений (иначе получите ошибку
+#    "externally-managed-environment" при pip install)
+sudo apt update && sudo apt install -y python3-venv
+
+# 2) Создайте и активируйте окружение рядом с проектом
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3) Установите зависимости и запустите сервер
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+> Если всё же видите предупреждение про *externally-managed-environment*, значит вы не в активированном `.venv`. Выполните `source .venv/bin/activate` и повторите `pip install -r requirements.txt`.
+ main
 
 ## 8. Частые проблемы
 - **Нет доступа к таблицам** — проверьте, что сервисный аккаунт добавлен в Google Sheets с правами Editor.
@@ -139,16 +158,24 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   - запустите демон: `sudo systemctl start docker` (или `sudo service docker start` на старых системах);
   - добавьте пользователя в группу docker и **перезайдите в терминал/сессию**: `sudo usermod -aG docker "$USER"`;
   - для единичного запуска можно выполнить команду с sudo: `sudo docker compose up --build`.
+codex/analyze-project-readiness-and-setup-ilokil
 - **Конфликты после `git pull`** — сделайте копию `.env` и `credentials/`, затем либо сбросьте репозиторий к последней версии (`git fetch origin && git reset --hard origin/main && git clean -fd`), либо вручную разрешите конфликт в файлах, удалив маркеры `<<<<<<<`/`=======`/`>>>>>>>` и зафиксировав правку `git add . && git commit -m "Resolve merge conflicts"`.
 - **`pip install` не может скачать пакеты (PyPI недоступен)** — запустите `./scripts/setup_local.sh`, он проверит доступ к индексу и подскажет: добавить прокси-переменные или, наоборот, убрать их. При наличии корпоративного зеркала задайте `PIP_INDEX_URL=https://<mirror>/simple`.
 - **Сборка dlib падает при `pip install -r requirements.txt`** (вручную, без Docker) — установите системные библиотеки и повторите (на свежих Debian/Ubuntu используйте `libblas-dev` вместо устаревшего `libatlas-base-dev`):
+=======
+- **Сборка dlib падает при `pip install -r requirements.txt`** (вручную, без Docker) — установите системные библиотеки и повторите:
+ main
   ```bash
   sudo apt update
   sudo apt install -y \
     cmake \
     libopenblas-dev \
     liblapack-dev \
+ codex/analyze-project-readiness-and-setup-ilokil
     libblas-dev \
+=======
+    libatlas-base-dev \
+ main
     libboost-all-dev \
     gfortran \
     pkg-config \

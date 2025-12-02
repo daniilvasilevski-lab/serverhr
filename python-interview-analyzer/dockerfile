@@ -39,7 +39,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     libopenblas-dev \
     liblapack-dev \
+ codex/analyze-project-readiness-and-setup-ilokil
     libblas-dev \
+=======
+    libatlas-base-dev \
+ main
     libboost-all-dev \
     gfortran \
     pkg-config \
