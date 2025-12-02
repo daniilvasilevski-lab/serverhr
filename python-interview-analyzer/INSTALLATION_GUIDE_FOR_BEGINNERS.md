@@ -192,7 +192,7 @@ ls
 
 Вы должны увидеть файлы проекта:
 ```
-app/  docker-compose.yaml  dockerfile  prompts.yaml  requirements.txt  ...
+app/  docker-compose.yaml  Dockerfile  prompts.yaml  requirements.txt  ...
 ```
 
 ✅ **Отлично!** Проект скачан.

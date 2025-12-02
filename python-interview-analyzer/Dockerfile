@@ -20,32 +20,37 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # === ЭТАП ЗАВИСИМОСТЕЙ ===
 FROM base as dependencies
 
-# Установка системных зависимостей
-RUN apt-get update && apt-get install -y \
-    # Системные утилиты
+# Установка системных зависимостей (минимальный набор для сборки dlib/face-recognition)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     curl \
     wget \
     git \
-    # Аудио/видео обработка
     ffmpeg \
     libsm6 \
     libxext6 \
     libxrender-dev \
     libglib2.0-0 \
-    # Для компиляции Python пакетов
+    libx11-dev \
+    libgtk-3-dev \
+    libgl1-mesa-dev \
+    cmake \
+    libopenblas-dev \
+    liblapack-dev \
+    libblas-dev \
+    libboost-all-dev \
+    gfortran \
+    pkg-config \
     gcc \
     g++ \
     build-essential \
     python3-dev \
-    # Для работы с изображениями
     libjpeg-dev \
     libpng-dev \
-    # Для работы с аудио
     libasound2-dev \
-    portaudio19-dev \
-    # Очистка кеша
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    portaudio19-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Обновление pip
 RUN pip install --upgrade pip setuptools wheel
